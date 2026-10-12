@@ -1,0 +1,2456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#02050b">
+
+<title>THE HORIZON | RISNE Robotics</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root {
+    --blue: #00bfff;
+    --cyan: #55eaff;
+    --deep: #006eff;
+    --dark: #02050b;
+    --dark2: #050b15;
+    --white: #eefaff;
+    --gray: #8ba8ba;
+    --border: rgba(0,191,255,.23);
+    --glow: 0 0 24px rgba(0,191,255,.35);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    scroll-behavior: smooth;
+}
+
+body {
+    background:
+        radial-gradient(circle at 50% -10%, rgba(0,145,255,.18), transparent 35%),
+        radial-gradient(circle at 10% 40%, rgba(0,110,255,.07), transparent 30%),
+        var(--dark);
+    color: var(--white);
+    font-family: 'Rajdhani', sans-serif;
+    overflow-x: hidden;
+}
+
+body.loading {
+    overflow: hidden;
+}
+
+a {
+    color: inherit;
+}
+
+button, input {
+    font: inherit;
+}
+
+button {
+    -webkit-tap-highlight-color: transparent;
+}
+
+::selection {
+    background: var(--blue);
+    color: #001019;
+}
+
+::-webkit-scrollbar {
+    width: 9px;
+}
+
+::-webkit-scrollbar-track {
+    background: #02050b;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #07527b;
+    border-radius: 10px;
+}
+
+/* LOADING SCREEN */
+
+#loader {
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+    background:
+        radial-gradient(circle at center, rgba(0,145,255,.19), transparent 40%),
+        #010308;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    transition: opacity .8s ease, visibility .8s ease;
+}
+
+#loader.hide {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.loader-ring {
+    position: absolute;
+    width: min(430px, 85vw);
+    aspect-ratio: 1;
+    border: 2px solid rgba(0,191,255,.2);
+    border-top-color: var(--cyan);
+    border-bottom-color: var(--deep);
+    border-radius: 50%;
+    animation: spin 3s linear infinite;
+}
+
+.loader-ring::before {
+    content: "";
+    position: absolute;
+    inset: 22px;
+    border: 1px solid rgba(85,234,255,.3);
+    border-left-color: var(--blue);
+    border-radius: 50%;
+    animation: spinReverse 2s linear infinite;
+}
+
+.loader-content {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+}
+
+.loader-logo {
+    width: min(280px, 65vw);
+    max-height: 230px;
+    object-fit: contain;
+    animation: logoPulse 2s infinite alternate, float 4s ease-in-out infinite;
+    filter: drop-shadow(0 0 20px rgba(0,191,255,.8));
+}
+
+.loader-text {
+    margin-top: 28px;
+    font-family: Orbitron, sans-serif;
+    font-size: 12px;
+    letter-spacing: 3px;
+    color: var(--cyan);
+}
+
+.loader-percent {
+    margin-top: 12px;
+    font-family: Orbitron, sans-serif;
+    font-size: 25px;
+}
+
+.loader-bar {
+    margin: 20px auto 0;
+    width: 260px;
+    max-width: 65vw;
+    height: 3px;
+    background: #10202c;
+    overflow: hidden;
+}
+
+.loader-progress {
+    width: 0;
+    height: 100%;
+    background: linear-gradient(90deg, var(--deep), var(--cyan));
+    box-shadow: 0 0 15px var(--blue);
+}
+
+/* CURSOR GLOW */
+
+.cursor {
+    position: fixed;
+    width: 280px;
+    height: 280px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(0,191,255,.08), transparent 70%);
+    pointer-events: none;
+    transform: translate(-50%,-50%);
+    z-index: 0;
+}
+
+/* NAVIGATION */
+
+nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    min-height: 76px;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 10px 6%;
+    background: rgba(1,5,12,.82);
+    backdrop-filter: blur(18px);
+    border-bottom: 1px solid var(--border);
+}
+
+.nav-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+    font-family: Orbitron, sans-serif;
+    font-weight: 800;
+    font-size: 14px;
+    letter-spacing: 2px;
+    white-space: nowrap;
+}
+
+.nav-logo img {
+    width: 48px;
+    height: 48px;
+    object-fit: contain;
+    filter: drop-shadow(0 0 8px var(--blue));
+}
+
+.nav-links {
+    display: flex;
+    gap: clamp(12px, 2.2vw, 30px);
+    align-items: center;
+    list-style: none;
+}
+
+.nav-links a {
+    color: #b8d9e8;
+    text-decoration: none;
+    font-family: Orbitron, sans-serif;
+    font-size: 10px;
+    letter-spacing: 1px;
+    transition: .3s;
+}
+
+.nav-links a:hover {
+    color: var(--cyan);
+    text-shadow: 0 0 12px var(--blue);
+}
+
+.menu-toggle {
+    display: none;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--cyan);
+    padding: 9px 12px;
+    cursor: pointer;
+}
+
+/* HERO */
+
+.hero {
+    min-height: 100vh;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    overflow: hidden;
+    padding: 125px 20px 75px;
+}
+
+.stars {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image:
+        radial-gradient(circle, #fff 1px, transparent 1px),
+        radial-gradient(circle, var(--blue) 1px, transparent 1px);
+    background-size: 90px 90px, 150px 150px;
+    background-position: 0 0, 40px 50px;
+    opacity: .22;
+    animation: starsMove 25s linear infinite;
+}
+
+.hero::before {
+    content: "";
+    position: absolute;
+    width: 700px;
+    height: 700px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(0,145,255,.16), transparent 65%);
+}
+
+.hero-content {
+    position: relative;
+    z-index: 2;
+    max-width: 1000px;
+}
+
+.hero-logo {
+    width: min(420px, 75vw);
+    max-height: 280px;
+    object-fit: contain;
+    margin-bottom: 22px;
+    filter: drop-shadow(0 0 18px rgba(0,191,255,.7));
+    animation: float 5s ease-in-out infinite;
+}
+
+.badge {
+    display: inline-block;
+    border: 1px solid rgba(0,191,255,.5);
+    padding: 9px 18px;
+    border-radius: 30px;
+    color: #7ceeff;
+    font-family: Orbitron, sans-serif;
+    font-size: 10px;
+    letter-spacing: 2px;
+    background: rgba(0,145,255,.06);
+}
+
+.hero h1 {
+    font-family: Orbitron, sans-serif;
+    font-size: clamp(37px, 7vw, 82px);
+    line-height: 1.12;
+    margin: 27px 0 18px;
+    text-shadow: 0 0 30px rgba(0,110,255,.4);
+}
+
+.hero h1 span {
+    color: var(--cyan);
+}
+
+.hero p {
+    color: #91aebd;
+    max-width: 700px;
+    margin: auto;
+    font-size: 19px;
+    line-height: 1.7;
+}
+
+.hero-buttons {
+    margin-top: 32px;
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.btn {
+    display: inline-block;
+    padding: 14px 24px;
+    border-radius: 4px;
+    text-decoration: none;
+    font-family: Orbitron, sans-serif;
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    transition: .3s;
+}
+
+.btn-primary {
+    color: #001019;
+    background: linear-gradient(90deg, var(--blue), var(--cyan));
+    box-shadow: 0 0 25px rgba(0,191,255,.3);
+}
+
+.btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 0 35px rgba(0,191,255,.65);
+}
+
+.btn-outline {
+    color: var(--cyan);
+    border: 1px solid var(--blue);
+}
+
+.btn-outline:hover {
+    background: rgba(0,191,255,.1);
+    box-shadow: var(--glow);
+}
+
+.scroll-cue {
+    position: absolute;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: Orbitron, sans-serif;
+    font-size: 9px;
+    letter-spacing: 3px;
+    color: #66889a;
+    animation: cue 2s infinite;
+}
+
+/* GENERAL SECTIONS */
+
+section {
+    padding: 100px 7%;
+    position: relative;
+    scroll-margin-top: 70px;
+}
+
+.section-title {
+    text-align: center;
+    margin-bottom: 55px;
+}
+
+.section-title small {
+    font-family: Orbitron, sans-serif;
+    color: var(--blue);
+    letter-spacing: 4px;
+    font-size: 10px;
+}
+
+.section-title h2 {
+    font-family: Orbitron, sans-serif;
+    font-size: clamp(28px, 5vw, 48px);
+    margin-top: 12px;
+}
+
+.section-title p {
+    color: #7893a3;
+    margin: 14px auto 0;
+    max-width: 650px;
+    font-size: 17px;
+    line-height: 1.6;
+}
+
+/* STATS */
+
+.stats {
+    display: grid;
+    grid-template-columns: repeat(4,1fr);
+    gap: 16px;
+    max-width: 1100px;
+    margin: -15px auto 0;
+    padding: 0 20px;
+    position: relative;
+    z-index: 5;
+}
+
+.stat {
+    padding: 27px 15px;
+    text-align: center;
+    background: rgba(5,13,24,.9);
+    border: 1px solid var(--border);
+    transition: .3s;
+}
+
+.stat:hover {
+    transform: translateY(-6px);
+    border-color: var(--blue);
+    box-shadow: var(--glow);
+}
+
+.stat h3 {
+    font-family: Orbitron, sans-serif;
+    font-size: 30px;
+    color: var(--cyan);
+}
+
+.stat p {
+    color: #7793a3;
+    margin-top: 7px;
+    font-size: 14px;
+}
+
+/* ABOUT */
+
+.about-grid {
+    max-width: 1150px;
+    margin: auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 50px;
+    align-items: center;
+}
+
+.about-text h3 {
+    font-family: Orbitron, sans-serif;
+    font-size: clamp(22px,3vw,30px);
+    margin-bottom: 20px;
+}
+
+.about-text h3 span {
+    color: var(--blue);
+}
+
+.about-text p {
+    color: #91aab8;
+    line-height: 1.8;
+    font-size: 17px;
+    margin-bottom: 15px;
+}
+
+.about-card {
+    position: relative;
+    min-height: 330px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(circle, rgba(0,191,255,.13), transparent 65%), #040b14;
+    border: 1px solid rgba(0,191,255,.3);
+    overflow: hidden;
+}
+
+.about-card::before {
+    content: "";
+    position: absolute;
+    inset: 14px;
+    border: 1px solid rgba(85,234,255,.15);
+    pointer-events: none;
+}
+
+.about-card img {
+    width: 75%;
+    max-width: 300px;
+    object-fit: contain;
+    filter: drop-shadow(0 0 20px var(--blue));
+}
+
+/* PROJECT */
+
+.project {
+    background: radial-gradient(circle at 50% 50%, rgba(0,100,255,.1), transparent 55%);
+}
+
+.project-card {
+    max-width: 1150px;
+    margin: auto;
+    border: 1px solid var(--border);
+    background: rgba(3,9,17,.86);
+    padding: clamp(20px,4vw,42px);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 38px;
+}
+
+.project-info h3 {
+    font-family: Orbitron, sans-serif;
+    font-size: 34px;
+    color: var(--cyan);
+}
+
+.project-info .code {
+    display: inline-block;
+    margin: 12px 0 20px;
+    color: var(--blue);
+    font-family: Orbitron, sans-serif;
+    font-size: 10px;
+    letter-spacing: 2px;
+}
+
+.project-info p {
+    color: #8ca5b4;
+    line-height: 1.8;
+    font-size: 17px;
+}
+
+.specs {
+    margin-top: 25px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.spec {
+    padding: 14px;
+    border-left: 2px solid var(--blue);
+    background: rgba(0,145,255,.05);
+}
+
+.spec b {
+    display: block;
+    font-family: Orbitron, sans-serif;
+    font-size: 10px;
+    color: var(--cyan);
+    margin-bottom: 5px;
+}
+
+.spec span {
+    color: #91a8b6;
+    font-size: 15px;
+}
+
+/* INTERACTIVE RC CONTROL */
+
+.control-panel {
+    background: #020711;
+    border: 1px solid rgba(0,191,255,.25);
+    padding: 23px;
+    min-width: 0;
+}
+
+.control-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 18px;
+    font-family: Orbitron, sans-serif;
+    font-size: 11px;
+}
+
+.online {
+    color: var(--cyan);
+    font-size: 9px;
+    white-space: nowrap;
+}
+
+.screen {
+    height: 135px;
+    background: #010509;
+    border: 1px solid rgba(0,191,255,.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 22px;
+    position: relative;
+    overflow: hidden;
+}
+
+.screen::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: var(--blue);
+    opacity: .25;
+    animation: scan 3s linear infinite;
+}
+
+.robot {
+    position: relative;
+    z-index: 1;
+    font-size: 55px;
+    filter: drop-shadow(0 0 15px var(--blue));
+    transition: transform .2s;
+}
+
+.control-status {
+    color: #819baa;
+    text-align: center;
+    margin: -9px 0 18px;
+    font-size: 14px;
+}
+
+.controls {
+    display: grid;
+    grid-template-columns: repeat(3,1fr);
+    gap: 8px;
+    max-width: 255px;
+    margin: auto;
+}
+
+.control-btn {
+    min-height: 49px;
+    border: 1px solid rgba(0,191,255,.35);
+    background: #06101c;
+    color: var(--cyan);
+    font-family: Orbitron, sans-serif;
+    cursor: pointer;
+    transition: .2s;
+}
+
+.control-btn:hover,
+.control-btn:focus-visible {
+    background: #06243a;
+    box-shadow: 0 0 18px rgba(0,191,255,.35);
+}
+
+.control-btn.stop {
+    color: #fff;
+    border-color: #ff3d68;
+}
+
+.control-btn.stop:hover {
+    background: rgba(255,61,104,.18);
+}
+
+.speed {
+    margin-top: 23px;
+}
+
+.speed label {
+    display: flex;
+    justify-content: space-between;
+    color: #91a8b6;
+    margin-bottom: 9px;
+}
+
+input[type=range] {
+    width: 100%;
+    accent-color: var(--blue);
+    cursor: pointer;
+}
+
+.demo-note {
+    margin-top: 17px;
+    font-size: 12px;
+    line-height: 1.5;
+    color: #6e8a9b;
+}
+
+/* INTERACTIVE TECHNOLOGY */
+
+.tech-intro {
+    max-width: 760px;
+    margin: -25px auto 35px;
+    text-align: center;
+    color: #819baa;
+    line-height: 1.7;
+}
+
+.tech-grid {
+    max-width: 1150px;
+    margin: auto;
+    display: grid;
+    grid-template-columns: repeat(2,minmax(0,1fr));
+    gap: 18px;
+}
+
+.tech-card {
+    position: relative;
+    background: linear-gradient(145deg, rgba(5,17,30,.96), rgba(2,7,15,.96));
+    border: 1px solid rgba(0,191,255,.19);
+    overflow: hidden;
+    transition: border-color .3s, transform .3s, box-shadow .3s;
+}
+
+.tech-card:hover,
+.tech-card.open {
+    border-color: var(--blue);
+    box-shadow: 0 0 25px rgba(0,191,255,.1);
+}
+
+.tech-card:hover {
+    transform: translateY(-3px);
+}
+
+.tech-toggle {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding: 24px;
+    color: var(--white);
+    background: transparent;
+    border: 0;
+    text-align: left;
+    cursor: pointer;
+}
+
+.tech-icon {
+    flex-shrink: 0;
+    width: 60px;
+    height: 60px;
+    display: grid;
+    place-items: center;
+    background: rgba(0,191,255,.08);
+    border: 1px solid rgba(0,191,255,.23);
+    color: var(--cyan);
+    font-size: 28px;
+    text-shadow: 0 0 15px var(--blue);
+}
+
+.tech-heading {
+    flex: 1;
+    min-width: 0;
+}
+
+.tech-heading h3 {
+    font-family: Orbitron, sans-serif;
+    font-size: 14px;
+    color: var(--cyan);
+    margin-bottom: 7px;
+}
+
+.tech-heading p {
+    color: #819baa;
+    font-size: 15px;
+    line-height: 1.5;
+}
+
+.tech-plus {
+    color: var(--cyan);
+    font-size: 25px;
+    transition: transform .3s;
+}
+
+.tech-card.open .tech-plus {
+    transform: rotate(45deg);
+}
+
+.tech-details {
+    display: none;
+    padding: 0 24px 25px;
+    color: #9bb1bf;
+    line-height: 1.75;
+    font-size: 16px;
+}
+
+.tech-card.open .tech-details {
+    display: block;
+    animation: reveal .3s ease;
+}
+
+.tech-details h4 {
+    color: var(--cyan);
+    font-family: Orbitron, sans-serif;
+    font-size: 11px;
+    letter-spacing: 1px;
+    margin: 15px 0 6px;
+}
+
+.tech-details ul {
+    padding-left: 20px;
+}
+
+.tech-details li {
+    margin: 5px 0;
+}
+
+.tech-details code {
+    color: var(--cyan);
+    background: rgba(0,191,255,.08);
+    padding: 2px 5px;
+    overflow-wrap: anywhere;
+}
+
+.tech-tip {
+    margin-top: 15px;
+    padding: 12px 14px;
+    border-left: 2px solid var(--blue);
+    background: rgba(0,191,255,.05);
+    font-size: 14px;
+}
+
+.tech-actions {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 28px;
+    flex-wrap: wrap;
+}
+
+.small-btn {
+    padding: 11px 16px;
+    border: 1px solid var(--border);
+    color: var(--cyan);
+    background: #05101c;
+    cursor: pointer;
+    font-family: Orbitron, sans-serif;
+    font-size: 10px;
+    letter-spacing: 1px;
+}
+
+.small-btn:hover {
+    border-color: var(--blue);
+    box-shadow: var(--glow);
+}
+
+/* GAME */
+
+.game-section {
+    background: #01040a;
+}
+
+.game-container {
+    max-width: 900px;
+    margin: auto;
+    text-align: center;
+}
+
+#gameCanvas {
+    display: block;
+    width: 100%;
+    height: auto;
+    border: 1px solid rgba(0,191,255,.4);
+    background: #01040a;
+    box-shadow: 0 0 35px rgba(0,110,255,.12);
+    touch-action: pan-y;
+}
+
+.game-info {
+    margin-top: 15px;
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    color: var(--cyan);
+    font-family: Orbitron, sans-serif;
+    font-size: 11px;
+}
+
+.game-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 20px;
+}
+
+.game-controls {
+    display: none;
+    gap: 15px;
+    justify-content: center;
+    margin-top: 16px;
+}
+
+.game-controls button {
+    width: 65px;
+    height: 45px;
+    background: #06101c;
+    color: var(--cyan);
+    border: 1px solid var(--border);
+    font-size: 20px;
+}
+
+/* BUILD JOURNEY */
+
+.timeline {
+    max-width: 850px;
+    margin: auto;
+    position: relative;
+}
+
+.timeline::before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: linear-gradient(var(--blue), transparent);
+}
+
+.step {
+    width: 50%;
+    padding: 20px 45px;
+    position: relative;
+}
+
+.step:nth-child(even) {
+    margin-left: 50%;
+}
+
+.step::after {
+    content: "";
+    position: absolute;
+    top: 30px;
+    right: -6px;
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    background: var(--cyan);
+    box-shadow: 0 0 15px var(--blue);
+}
+
+.step:nth-child(even)::after {
+    left: -5px;
+}
+
+.step h3 {
+    font-family: Orbitron, sans-serif;
+    font-size: 15px;
+    color: var(--cyan);
+}
+
+.step p {
+    color: #819baa;
+    margin-top: 8px;
+    line-height: 1.6;
+    font-size: 16px;
+}
+
+/* TEAM */
+
+.team-grid {
+    max-width: 1100px;
+    margin: auto;
+    display: grid;
+    grid-template-columns: repeat(3,minmax(0,1fr));
+    gap: 16px;
+}
+
+.member {
+    padding: 25px;
+    background: #040b14;
+    border: 1px solid rgba(0,191,255,.15);
+    position: relative;
+    overflow: hidden;
+    transition: .3s;
+}
+
+.member:hover {
+    transform: translateY(-5px);
+    border-color: var(--blue);
+    box-shadow: var(--glow);
+}
+
+.member::before {
+    content: "";
+    position: absolute;
+    width: 100%;
+    height: 2px;
+    top: 0;
+    left: -100%;
+    background: var(--cyan);
+    transition: .5s;
+}
+
+.member:hover::before {
+    left: 0;
+}
+
+.member span {
+    font-family: Orbitron, sans-serif;
+    font-size: 10px;
+    color: var(--blue);
+    letter-spacing: 1px;
+}
+
+.member h3 {
+    margin-top: 10px;
+    font-family: Orbitron, sans-serif;
+    font-size: 17px;
+}
+
+/* SCHOOL */
+
+.school {
+    text-align: center;
+    background: radial-gradient(circle at center, rgba(0,145,255,.12), transparent 55%), #02050b;
+}
+
+.school-logo {
+    width: 120px;
+    height: 120px;
+    object-fit: contain;
+    margin-bottom: 25px;
+    filter: drop-shadow(0 0 14px var(--blue));
+}
+
+.school h2 {
+    font-family: Orbitron, sans-serif;
+    font-size: clamp(22px,4vw,40px);
+    line-height: 1.4;
+}
+
+.school p {
+    color: #7893a3;
+    max-width: 700px;
+    margin: 15px auto;
+    font-size: 18px;
+    line-height: 1.7;
+}
+
+/* FOOTER */
+
+footer {
+    padding: 50px 7% 25px;
+    border-top: 1px solid rgba(0,191,255,.12);
+    text-align: center;
+}
+
+.footer-logo {
+    width: 110px;
+    height: 90px;
+    object-fit: contain;
+    filter: drop-shadow(0 0 12px var(--blue));
+}
+
+footer p {
+    color: #819baa;
+    margin-top: 15px;
+    letter-spacing: 1px;
+}
+
+.footer-links {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-top: 22px;
+}
+
+.footer-links a {
+    color: #819baa;
+    text-decoration: none;
+    font-size: 14px;
+}
+
+.footer-links a:hover {
+    color: var(--cyan);
+}
+
+.copyright {
+    margin-top: 28px;
+    font-size: 12px;
+    color: #526c7a;
+}
+
+/* ANIMATIONS */
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+@keyframes spinReverse {
+    to { transform: rotate(-360deg); }
+}
+
+@keyframes logoPulse {
+    from { filter: drop-shadow(0 0 8px var(--blue)); }
+    to { filter: drop-shadow(0 0 30px var(--deep)); }
+}
+
+@keyframes float {
+    0%,100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+@keyframes starsMove {
+    from { background-position: 0 0,40px 50px; }
+    to { background-position: 0 500px,40px 600px; }
+}
+
+@keyframes scan {
+    from { top: -10%; }
+    to { top: 110%; }
+}
+
+@keyframes cue {
+    0%,100% { opacity: .45; }
+    50% { opacity: 1; }
+}
+
+@keyframes reveal {
+    from { opacity: 0; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 900px) {
+    .nav-links {
+        gap: 12px;
+    }
+
+    .nav-links a {
+        font-size: 9px;
+    }
+
+    .about-grid,
+    .project-card {
+        grid-template-columns: 1fr;
+    }
+
+    .stats {
+        grid-template-columns: repeat(2,1fr);
+    }
+
+    .tech-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 680px) {
+    nav {
+        min-height: 68px;
+        padding: 8px 5%;
+    }
+
+    .nav-logo {
+        font-size: 12px;
+    }
+
+    .nav-logo img {
+        width: 40px;
+        height: 40px;
+    }
+
+    .menu-toggle {
+        display: block;
+    }
+
+    .nav-links {
+        display: none;
+        position: absolute;
+        top: 68px;
+        left: 0;
+        width: 100%;
+        padding: 15px 5% 22px;
+        background: rgba(1,5,12,.97);
+        border-bottom: 1px solid var(--border);
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0;
+    }
+
+    .nav-links.show {
+        display: flex;
+    }
+
+    .nav-links li a {
+        display: block;
+        padding: 13px 5px;
+        font-size: 11px;
+    }
+
+    section {
+        padding: 75px 5%;
+    }
+
+    .hero {
+        min-height: 92vh;
+        padding-top: 110px;
+    }
+
+    .hero p {
+        font-size: 17px;
+    }
+
+    .stats {
+        padding: 0 12px;
+        gap: 10px;
+    }
+
+    .stat {
+        padding: 20px 10px;
+    }
+
+    .stat h3 {
+        font-size: 24px;
+    }
+
+    .stat p {
+        font-size: 12px;
+    }
+
+    .project-card {
+        padding: 20px;
+        gap: 25px;
+    }
+
+    .control-panel {
+        padding: 17px;
+    }
+
+    .team-grid {
+        grid-template-columns: repeat(2,minmax(0,1fr));
+    }
+
+    .member {
+        padding: 20px 14px;
+    }
+
+    .member h3 {
+        font-size: 14px;
+    }
+
+    .timeline::before {
+        left: 5px;
+    }
+
+    .step,
+    .step:nth-child(even) {
+        width: 100%;
+        margin-left: 0;
+        padding: 20px 0 20px 30px;
+    }
+
+    .step::after,
+    .step:nth-child(even)::after {
+        left: 0;
+        right: auto;
+    }
+
+    .game-controls {
+        display: flex;
+    }
+
+    .cursor {
+        display: none;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        scroll-behavior: auto !important;
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .01ms !important;
+    }
+}
+</style>
+</head>
+
+<body class="loading">
+
+<!-- LOADING SCREEN -->
+
+<div id="loader" role="status" aria-live="polite">
+    <div class="loader-ring"></div>
+
+    <div class="loader-content">
+        <img src="logo.png" class="loader-logo" alt="The Horizon logo">
+
+        <div class="loader-text" id="loaderText">
+            INITIALIZING RC-01
+        </div>
+
+        <div class="loader-percent" id="loaderPercent">0%</div>
+
+        <div class="loader-bar">
+            <div class="loader-progress" id="loaderProgress"></div>
+        </div>
+    </div>
+</div>
+
+<div class="cursor" id="cursor"></div>
+
+<!-- NAVIGATION -->
+
+<nav>
+    <a href="#home" class="nav-logo">
+        <img src="logo.png" alt="The Horizon logo">
+        <span>THE HORIZON</span>
+    </a>
+
+    <button class="menu-toggle" id="menuToggle"
+            aria-label="Toggle navigation" aria-expanded="false">
+        ☰
+    </button>
+
+    <ul class="nav-links" id="navLinks">
+        <li><a href="#home">HOME</a></li>
+        <li><a href="#about">ABOUT</a></li>
+        <li><a href="#project">RC-01</a></li>
+        <li><a href="#technology">TECHNOLOGY</a></li>
+        <li><a href="#journey">JOURNEY</a></li>
+        <li><a href="#team">TEAM</a></li>
+    </ul>
+</nav>
+
+<!-- HERO -->
+
+<section class="hero" id="home">
+    <div class="stars"></div>
+
+    <div class="hero-content">
+        <img src="logo.png" class="hero-logo" alt="THE HORIZON robotics logo">
+
+        <div class="badge">RISNE ROBOTICS • 2026</div>
+
+        <h1>BUILD THE <span>FUTURE.</span></h1>
+
+        <p>
+            Welcome to THE HORIZON — a student robotics team
+            turning ideas, electronics and code into real-world machines.
+            We imagine what is possible and engineer our way towards it.
+        </p>
+
+        <div class="hero-buttons">
+            <a href="#project" class="btn btn-primary">EXPLORE RC-01</a>
+            <a href="#team" class="btn btn-outline">MEET THE TEAM</a>
+        </div>
+    </div>
+
+    <div class="scroll-cue">SCROLL TO EXPLORE ↓</div>
+</section>
+
+<!-- STATS -->
+
+<div class="stats">
+    <div class="stat">
+        <h3>01</h3>
+        <p>ROBOT PROJECT</p>
+    </div>
+
+    <div class="stat">
+        <h3>07</h3>
+        <p>TEAM MEMBERS</p>
+    </div>
+
+    <div class="stat">
+        <h3>04+</h3>
+        <p>CORE COMPONENTS</p>
+    </div>
+
+    <div class="stat">
+        <h3>∞</h3>
+        <p>POSSIBILITIES</p>
+    </div>
+</div>
+
+<!-- ABOUT -->
+
+<section id="about">
+    <div class="section-title">
+        <small>WHO WE ARE</small>
+        <h2>THE HORIZON</h2>
+        <p>We don't just build robots. We build the technology of tomorrow.</p>
+    </div>
+
+    <div class="about-grid">
+        <div class="about-text">
+            <h3>THINK. <span>BUILD.</span> INNOVATE.</h3>
+
+            <p>
+                THE HORIZON is a student robotics team from
+                Ryan International School Noida Extension.
+            </p>
+
+            <p>
+                We explore robotics by combining electronics,
+                programming, engineering and creativity to design
+                machines that bring our ideas to life.
+            </p>
+
+            <p>
+                From assembling components to testing code, every
+                stage of our journey teaches us how to solve problems
+                and improve our designs.
+            </p>
+
+            <p>
+                Our mission is simple: keep learning, keep building
+                and keep moving towards the horizon.
+            </p>
+        </div>
+
+        <div class="about-card">
+            <img src="logo.png" alt="THE HORIZON emblem">
+        </div>
+    </div>
+</section>
+
+<!-- PROJECT -->
+
+<section class="project" id="project">
+    <div class="section-title">
+        <small>PROJECT // 001</small>
+        <h2>RC-01</h2>
+        <p>
+            A student-built robotic vehicle bringing together
+            movement, sensing and electronic control.
+        </p>
+    </div>
+
+    <div class="project-card">
+        <div class="project-info">
+            <h3>RC-01</h3>
+            <span class="code">HORIZON ROBOTIC PLATFORM</span>
+
+            <p>
+                RC-01 is our robotic car project. Its design uses
+                an Arduino controller, a motor driver, an ultrasonic
+                sensor and an LCD interface. Together, these components
+                can support movement, distance measurement and useful
+                status information.
+            </p>
+
+            <div class="specs">
+                <div class="spec">
+                    <b>CONTROLLER</b>
+                    <span>Arduino Uno R3</span>
+                </div>
+
+                <div class="spec">
+                    <b>MOTOR DRIVER</b>
+                    <span>L298N</span>
+                </div>
+
+                <div class="spec">
+                    <b>DISTANCE SENSOR</b>
+                    <span>Ultrasonic</span>
+                </div>
+
+                <div class="spec">
+                    <b>DISPLAY</b>
+                    <span>16×2 LCD</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- SIMULATED RC CONTROL -->
+
+        <div class="control-panel">
+            <div class="control-header">
+                <b>RC-01 CONTROL</b>
+                <span class="online">● DEMO MODE</span>
+            </div>
+
+            <div class="screen">
+                <div class="robot" id="robot">🤖</div>
+            </div>
+
+            <div class="control-status" id="robotStatus">
+                System standing by
+            </div>
+
+            <div class="controls">
+                <div></div>
+                <button class="control-btn" data-direction="↑" aria-label="Forward">▲</button>
+                <div></div>
+
+                <button class="control-btn" data-direction="←" aria-label="Left">◀</button>
+                <button class="control-btn stop" id="stopRobot" aria-label="Stop">■</button>
+                <button class="control-btn" data-direction="→" aria-label="Right">▶</button>
+
+                <div></div>
+                <button class="control-btn" data-direction="↓" aria-label="Reverse">▼</button>
+                <div></div>
+            </div>
+
+            <div class="speed">
+                <label for="speed">
+                    <span>SPEED SETTING</span>
+                    <span id="speedValue">50%</span>
+                </label>
+
+                <input type="range" id="speed" min="0" max="100" value="50">
+            </div>
+
+            <p class="demo-note">
+                This is a website demonstration only. These buttons
+                do not connect to or physically control the real RC-01.
+            </p>
+        </div>
+    </div>
+</section>
+
+<!-- INTERACTIVE TECHNOLOGY -->
+
+<section id="technology">
+    <div class="section-title">
+        <small>SYSTEM ARCHITECTURE</small>
+        <h2>TECHNOLOGY</h2>
+        <p>Explore the components that can power and support RC-01.</p>
+    </div>
+
+    <p class="tech-intro">
+        Select any component to explore its purpose, how it works,
+        important specifications and how it can fit into a robotic car.
+        Tap again to close the details.
+    </p>
+
+    <div class="tech-grid">
+
+        <!-- ARDUINO -->
+
+        <article class="tech-card">
+            <button class="tech-toggle" aria-expanded="false">
+                <span class="tech-icon">⚡</span>
+                <span class="tech-heading">
+                    <h3>ARDUINO UNO R3</h3>
+                    <p>The controller that runs the robot's program</p>
+                </span>
+                <span class="tech-plus">+</span>
+            </button>
+
+            <div class="tech-details">
+                <p>
+                    The Arduino Uno R3 is a microcontroller development
+                    board. It reads inputs, runs instructions written
+                    in a program and controls connected electronic devices.
+                </p>
+
+                <h4>WHAT DOES IT DO?</h4>
+                <ul>
+                    <li>Reads signals from sensors and input devices.</li>
+                    <li>Controls outputs using digital and PWM pins.</li>
+                    <li>Can send movement commands to a motor driver.</li>
+                    <li>Can update an LCD with information from the program.</li>
+                </ul>
+
+                <h4>IMPORTANT SPECIFICATIONS</h4>
+                <ul>
+                    <li>Microcontroller: ATmega328P.</li>
+                    <li>Operating logic voltage: 5 V.</li>
+                    <li>Digital input/output pins: 14, including 6 PWM-capable pins.</li>
+                    <li>Analog inputs: 6.</li>
+                    <li>Typical clock speed: 16 MHz.</li>
+                </ul>
+
+                <h4>HOW IT FITS INTO RC-01</h4>
+                <p>
+                    The Arduino can process distance measurements and
+                    decide which motor commands to send to the L298N.
+                    The exact behaviour depends on the program and wiring.
+                </p>
+
+                <div class="tech-tip">
+                    <strong>Remember:</strong> Never assume a pin is
+                    available without checking the complete wiring and code.
+                </div>
+            </div>
+        </article>
+
+        <!-- L298N -->
+
+        <article class="tech-card">
+            <button class="tech-toggle" aria-expanded="false">
+                <span class="tech-icon">⚙</span>
+                <span class="tech-heading">
+                    <h3>L298N MOTOR DRIVER</h3>
+                    <p>Controls the direction and drive of DC motors</p>
+                </span>
+                <span class="tech-plus">+</span>
+            </button>
+
+            <div class="tech-details">
+                <p>
+                    The L298N is a dual H-bridge motor driver IC commonly
+                    found on modules used in small robotics projects.
+                    It allows low-power control signals to control the
+                    direction of suitable external motor loads.
+                </p>
+
+                <h4>WHAT DOES IT DO?</h4>
+                <ul>
+                    <li>Provides control for two DC motor channels.</li>
+                    <li>Changes motor direction through input combinations.</li>
+                    <li>Can support speed control using suitable PWM signals.</li>
+                    <li>Separates motor power requirements from the Arduino's signal pins.</li>
+                </ul>
+
+                <h4>COMMON MODULE CONNECTIONS</h4>
+                <ul>
+                    <li><code>IN1–IN4</code>: motor direction inputs.</li>
+                    <li><code>ENA</code> and <code>ENB</code>: channel enable or speed control, depending on module configuration.</li>
+                    <li><code>OUT1–OUT4</code>: motor output terminals.</li>
+                    <li>Motor power and logic power must follow the specific module's documentation.</li>
+                </ul>
+
+                <h4>HOW IT FITS INTO RC-01</h4>
+                <p>
+                    The Arduino sends control signals to the driver.
+                    The driver then controls the connected motors.
+                    Forward, reverse and turning behaviour depends on
+                    the motor wiring and program.
+                </p>
+
+                <div class="tech-tip">
+                    <strong>Important:</strong> The L298N can become hot
+                    and has a noticeable voltage drop. Check motor current,
+                    supply voltage, cooling and module limits before use.
+                </div>
+            </div>
+        </article>
+
+        <!-- ULTRASONIC -->
+
+        <article class="tech-card">
+            <button class="tech-toggle" aria-expanded="false">
+                <span class="tech-icon">◉</span>
+                <span class="tech-heading">
+                    <h3>ULTRASONIC SENSOR</h3>
+                    <p>Measures distance using sound pulses</p>
+                </span>
+                <span class="tech-plus">+</span>
+            </button>
+
+            <div class="tech-details">
+                <p>
+                    An ultrasonic distance sensor sends a high-frequency
+                    sound pulse and measures how long it takes for the
+                    echo to return from a nearby object.
+                </p>
+
+                <h4>HOW DISTANCE IS ESTIMATED</h4>
+                <p>
+                    Sound travels to the object and back, so the measured
+                    time represents a round trip. A simplified calculation is:
+                </p>
+
+                <p>
+                    <code>Distance = Echo time × Speed of sound ÷ 2</code>
+                </p>
+
+                <h4>COMMON HC-SR04 CONNECTIONS</h4>
+                <ul>
+                    <li><code>VCC</code>: supply voltage, typically 5 V for the HC-SR04.</li>
+                    <li><code>GND</code>: ground.</li>
+                    <li><code>TRIG</code>: trigger pulse from the controller.</li>
+                    <li><code>ECHO</code>: pulse indicating echo travel time.</li>
+                </ul>
+
+                <h4>HOW IT FITS INTO RC-01</h4>
+                <ul>
+                    <li>Measures the approximate distance to objects in front of the sensor.</li>
+                    <li>Can trigger a stop or turning decision in suitable code.</li>
+                    <li>Can provide distance readings for an LCD display.</li>
+                </ul>
+
+                <div class="tech-tip">
+                    <strong>Remember:</strong> Readings can be affected
+                    by object shape, surface, angle and surrounding conditions.
+                    Check the sensor's voltage requirements before connecting it.
+                </div>
+            </div>
+        </article>
+
+        <!-- LCD -->
+
+        <article class="tech-card">
+            <button class="tech-toggle" aria-expanded="false">
+                <span class="tech-icon">▣</span>
+                <span class="tech-heading">
+                    <h3>16×2 LCD DISPLAY</h3>
+                    <p>Shows readable status information</p>
+                </span>
+                <span class="tech-plus">+</span>
+            </button>
+
+            <div class="tech-details">
+                <p>
+                    A 16×2 character LCD displays up to 16 characters
+                    on each of two rows. It can make a robot easier to
+                    monitor without needing a computer screen.
+                </p>
+
+                <h4>WHAT CAN IT DISPLAY?</h4>
+                <ul>
+                    <li>Robot status such as READY, MOVING or STOPPED.</li>
+                    <li>Distance readings from a compatible sensor.</li>
+                    <li>Selected operating modes.</li>
+                    <li>Simple messages that help with testing and debugging.</li>
+                </ul>
+
+                <h4>COMMON CONNECTION OPTIONS</h4>
+                <ul>
+                    <li>Parallel interface: uses several data and control pins.</li>
+                    <li>I²C adapter: uses SDA and SCL for communication, with the correct library and address.</li>
+                    <li>Contrast and backlight settings depend on the display module.</li>
+                </ul>
+
+                <h4>HOW IT FITS INTO RC-01</h4>
+                <p>
+                    The Arduino can refresh the LCD with information
+                    such as the measured distance or the robot's current
+                    programmed state.
+                </p>
+
+                <div class="tech-tip">
+                    <strong>Remember:</strong> A display with an I²C
+                    adapter and a standard parallel LCD need different
+                    wiring and code. Check which type your project uses.
+                </div>
+            </div>
+        </article>
+
+        <!-- DC MOTORS -->
+
+        <article class="tech-card">
+            <button class="tech-toggle" aria-expanded="false">
+                <span class="tech-icon">↻</span>
+                <span class="tech-heading">
+                    <h3>DC GEAR MOTORS</h3>
+                    <p>Convert electrical energy into wheel movement</p>
+                </span>
+                <span class="tech-plus">+</span>
+            </button>
+
+            <div class="tech-details">
+                <p>
+                    DC gear motors combine a DC motor with a gearbox.
+                    The gearbox reduces rotational speed and increases
+                    the available output torque compared with the motor
+                    operating without that reduction.
+                </p>
+
+                <h4>WHY USE THEM?</h4>
+                <ul>
+                    <li>Provide wheel rotation for movement.</li>
+                    <li>Gear reduction can help a small car move under load.</li>
+                    <li>Separate left and right motor control can support turning.</li>
+                </ul>
+
+                <h4>IMPORTANT THINGS TO CHECK</h4>
+                <ul>
+                    <li>Rated motor voltage.</li>
+                    <li>Operating and stall current.</li>
+                    <li>Gear ratio, output speed and torque.</li>
+                    <li>Wheel size, traction and total robot weight.</li>
+                </ul>
+
+                <h4>HOW IT FITS INTO RC-01</h4>
+                <p>
+                    The motor driver controls the connected motors.
+                    The resulting movement depends on the chassis,
+                    motor placement, wiring and control program.
+                </p>
+
+                <div class="tech-tip">
+                    <strong>Safety:</strong> A motor can draw much more
+                    current when stalled than when spinning freely.
+                    Choose the driver and power source accordingly.
+                </div>
+            </div>
+        </article>
+
+        <!-- POWER -->
+
+        <article class="tech-card">
+            <button class="tech-toggle" aria-expanded="false">
+                <span class="tech-icon">🔋</span>
+                <span class="tech-heading">
+                    <h3>POWER SYSTEM</h3>
+                    <p>Supplies suitable power to the electronics and motors</p>
+                </span>
+                <span class="tech-plus">+</span>
+            </button>
+
+            <div class="tech-details">
+                <p>
+                    A robot's power system must supply the voltage and
+                    current required by its controller, driver, motors
+                    and display. The correct setup depends on the
+                    actual components used in the build.
+                </p>
+
+                <h4>WHAT SHOULD BE CONSIDERED?</h4>
+                <ul>
+                    <li>Use a suitable supply for the motors and motor driver.</li>
+                    <li>Supply the Arduino using a supported input method.</li>
+                    <li>Check the current needs of every connected component.</li>
+                    <li>Use secure connections and suitable wiring.</li>
+                    <li>Follow the required common-ground arrangement for control signals.</li>
+                </ul>
+
+                <h4>WHY DOES POWER MATTER?</h4>
+                <p>
+                    An undersized or unstable supply may cause resets,
+                    weak motors, display glitches or unreliable sensor
+                    readings.
+                </p>
+
+                <div class="tech-tip">
+                    <strong>Important:</strong> Never connect a battery
+                    directly to a component without checking its voltage
+                    requirements and polarity.
+                </div>
+            </div>
+        </article>
+
+    </div>
+
+    <div class="tech-actions">
+        <button class="small-btn" id="expandTech">EXPAND ALL</button>
+        <button class="small-btn" id="collapseTech">COLLAPSE ALL</button>
+    </div>
+</section>
+
+<!-- NEON RUN GAME -->
+
+<section class="game-section" id="game">
+    <div class="section-title">
+        <small>HORIZON MINI GAME</small>
+        <h2>NEON RUN</h2>
+        <p>
+            Test your reflexes. Move the blue vehicle left and right
+            to dodge the incoming obstacles.
+        </p>
+    </div>
+
+    <div class="game-container">
+        <canvas id="gameCanvas" width="850" height="400"
+                aria-label="Neon Run game area"></canvas>
+
+        <div class="game-info">
+            <span>SCORE: <span id="score">0</span></span>
+            <span>BEST: <span id="bestScore">0</span></span>
+            <span>← → MOVE</span>
+        </div>
+
+        <div class="game-buttons">
+            <button class="small-btn" id="startGame">START / RESTART</button>
+        </div>
+
+        <div class="game-controls">
+            <button id="gameLeft" aria-label="Move left">◀</button>
+            <button id="gameRight" aria-label="Move right">▶</button>
+        </div>
+    </div>
+</section>
+
+<!-- BUILD JOURNEY -->
+
+<section id="journey">
+    <div class="section-title">
+        <small>DEVELOPMENT LOG</small>
+        <h2>BUILD JOURNEY</h2>
+        <p>From an idea to a working machine — one step at a time.</p>
+    </div>
+
+    <div class="timeline">
+        <div class="step">
+            <h3>01 // IDEA</h3>
+            <p>We begin with a concept and identify what we want our robotic vehicle to do.</p>
+        </div>
+
+        <div class="step">
+            <h3>02 // DESIGN</h3>
+            <p>We plan the chassis, electronics, sensors and motor-control approach.</p>
+        </div>
+
+        <div class="step">
+            <h3>03 // BUILD</h3>
+            <p>We assemble the available components and connect the system according to the design.</p>
+        </div>
+
+        <div class="step">
+            <h3>04 // CODE</h3>
+            <p>We program the controller to process inputs and manage the robot's behaviour.</p>
+        </div>
+
+        <div class="step">
+            <h3>05 // TEST</h3>
+            <p>We test the system, identify problems and improve the design through iteration.</p>
+        </div>
+    </div>
+</section>
+
+<!-- TEAM -->
+
+<section id="team">
+    <div class="section-title">
+        <small>THE PEOPLE BEHIND THE ROBOT</small>
+        <h2>THE HORIZON TEAM</h2>
+        <p>Seven minds. One vision. A shared passion for innovation.</p>
+    </div>
+
+    <div class="team-grid">
+        <div class="member">
+            <span>HORIZON // 01</span>
+            <h3>ARJUN</h3>
+        </div>
+
+        <div class="member">
+            <span>HORIZON // 02</span>
+            <h3>ALOKIK</h3>
+        </div>
+
+        <div class="member">
+            <span>HORIZON // 03</span>
+            <h3>AVANISH</h3>
+        </div>
+
+        <div class="member">
+            <span>HORIZON // 04</span>
+            <h3>RAKSHIT</h3>
+        </div>
+
+        <div class="member">
+            <span>HORIZON // 05</span>
+            <h3>ARHAAN</h3>
+        </div>
+
+        <div class="member">
+            <span>HORIZON // 06</span>
+            <h3>NAMAN</h3>
+        </div>
+
+        <div class="member">
+            <span>HORIZON // 07</span>
+            <h3>ARNAV</h3>
+        </div>
+    </div>
+</section>
+
+<!-- SCHOOL -->
+
+<section class="school" id="school">
+    <img src="logo.png" class="school-logo" alt="THE HORIZON logo">
+
+    <h2>RYAN INTERNATIONAL SCHOOL<br>NOIDA EXTENSION</h2>
+
+    <p>
+        RISNE — where curiosity becomes innovation
+        and ideas become reality.
+    </p>
+
+    <div class="badge">STUDENT ROBOTICS • ENGINEERING • INNOVATION</div>
+</section>
+
+<!-- FOOTER -->
+
+<footer>
+    <img src="logo.png" class="footer-logo" alt="THE HORIZON logo">
+
+    <p>THE HORIZON • ROBOTICS &amp; INNOVATION</p>
+
+    <div class="footer-links">
+        <a href="#home">Home</a>
+        <a href="#about">About</a>
+        <a href="#project">RC-01</a>
+        <a href="#technology">Technology</a>
+        <a href="#team">Team</a>
+    </div>
+
+    <div class="copyright">
+        © 2026 THE HORIZON | RISNE
+    </div>
+</footer>
+
+<script>
+/* ================= LOADING SCREEN ================= */
+
+const loader = document.getElementById("loader");
+const loaderProgress = document.getElementById("loaderProgress");
+const loaderPercent = document.getElementById("loaderPercent");
+const loaderText = document.getElementById("loaderText");
+
+const loadingMessages = [
+    "INITIALIZING RC-01",
+    "LOADING HORIZON SYSTEMS",
+    "CHECKING COMPONENTS",
+    "CALIBRATING INTERFACE",
+    "LOADING TECHNOLOGY",
+    "SYSTEM READY"
+];
+
+let loadingProgress = 0;
+
+const loadingInterval = setInterval(() => {
+    loadingProgress += Math.floor(Math.random() * 4) + 1;
+
+    if (loadingProgress >= 100) {
+        loadingProgress = 100;
+        clearInterval(loadingInterval);
+
+        loaderText.textContent = "SYSTEM READY";
+        finishLoading();
+    } else {
+        const messageIndex = Math.min(
+            Math.floor(loadingProgress / 18),
+            loadingMessages.length - 2
+        );
+
+        loaderText.textContent = loadingMessages[messageIndex];
+    }
+
+    loaderProgress.style.width = loadingProgress + "%";
+    loaderPercent.textContent = loadingProgress + "%";
+}, 45);
+
+function finishLoading() {
+    setTimeout(() => {
+        loader.classList.add("hide");
+        document.body.classList.remove("loading");
+    }, 450);
+}
+
+/* Ensure the page remains accessible if an image or external font fails. */
+window.addEventListener("load", () => {
+    if (loadingProgress < 100) {
+        loadingProgress = 100;
+        loaderProgress.style.width = "100%";
+        loaderPercent.textContent = "100%";
+        clearInterval(loadingInterval);
+        finishLoading();
+    }
+});
+
+/* ================= CURSOR GLOW ================= */
+
+const cursor = document.getElementById("cursor");
+
+document.addEventListener("mousemove", event => {
+    cursor.style.left = event.clientX + "px";
+    cursor.style.top = event.clientY + "px";
+});
+
+/* ================= MOBILE NAVIGATION ================= */
+
+const menuToggle = document.getElementById("menuToggle");
+const navLinks = document.getElementById("navLinks");
+
+menuToggle.addEventListener("click", () => {
+    const isOpen = navLinks.classList.toggle("show");
+    menuToggle.setAttribute("aria-expanded", String(isOpen));
+    menuToggle.textContent = isOpen ? "✕" : "☰";
+});
+
+navLinks.querySelectorAll("a").forEach(link => {
+    link.addEventListener("click", () => {
+        navLinks.classList.remove("show");
+        menuToggle.setAttribute("aria-expanded", "false");
+        menuToggle.textContent = "☰";
+    });
+});
+
+/* ================= SIMULATED RC-01 CONTROL ================= */
+
+const robot = document.getElementById("robot");
+const robotStatus = document.getElementById("robotStatus");
+const speedSlider = document.getElementById("speed");
+const speedValue = document.getElementById("speedValue");
+
+const directionLabels = {
+    "↑": "Moving forward (demo)",
+    "←": "Turning left (demo)",
+    "→": "Turning right (demo)",
+    "↓": "Reversing (demo)"
+};
+
+function moveRobot(direction) {
+    robot.textContent = direction;
+    robotStatus.textContent = directionLabels[direction];
+    robot.style.transform = "scale(1.15)";
+    robot.style.color = "#55eaff";
+
+    setTimeout(() => {
+        robot.style.transform = "scale(1)";
+    }, 160);
+}
+
+function stopRobot() {
+    robot.textContent = "🤖";
+    robotStatus.textContent = "Robot stopped (demo)";
+    robot.style.transform = "scale(1)";
+}
+
+document.querySelectorAll("[data-direction]").forEach(button => {
+    button.addEventListener("click", () => {
+        moveRobot(button.dataset.direction);
+    });
+});
+
+document.getElementById("stopRobot").addEventListener("click", stopRobot);
+
+speedSlider.addEventListener("input", () => {
+    speedValue.textContent = speedSlider.value + "%";
+});
+
+/* ================= INTERACTIVE TECHNOLOGY ================= */
+
+const techCards = [...document.querySelectorAll(".tech-card")];
+
+function setTechCard(card, open) {
+    card.classList.toggle("open", open);
+
+    const button = card.querySelector(".tech-toggle");
+    button.setAttribute("aria-expanded", String(open));
+
+    card.querySelector(".tech-plus").textContent = open ? "×" : "+";
+}
+
+techCards.forEach(card => {
+    const button = card.querySelector(".tech-toggle");
+
+    button.addEventListener("click", () => {
+        setTechCard(card, !card.classList.contains("open"));
+    });
+});
+
+document.getElementById("expandTech").addEventListener("click", () => {
+    techCards.forEach(card => setTechCard(card, true));
+});
+
+document.getElementById("collapseTech").addEventListener("click", () => {
+    techCards.forEach(card => setTechCard(card, false));
+});
+
+/* ================= NEON RUN GAME ================= */
+
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
+
+const scoreDisplay = document.getElementById("score");
+const bestDisplay = document.getElementById("bestScore");
+const startGameButton = document.getElementById("startGame");
+
+let player = {
+    x: canvas.width / 2 - 20,
+    y: canvas.height - 65,
+    width: 40,
+    height: 45,
+    speed: 6
+};
+
+let obstacles = [];
+let score = 0;
+let bestScore = 0;
+let keys = {};
+let gameRunning = false;
+let gameOver = false;
+let spawnTimer = 0;
+let lastFrame = 0;
+
+try {
+    bestScore = Number(localStorage.getItem("horizonNeonRunBest")) || 0;
+} catch (error) {
+    bestScore = 0;
+}
+
+bestDisplay.textContent = bestScore;
+
+function startGame() {
+    player.x = canvas.width / 2 - player.width / 2;
+    obstacles = [];
+    score = 0;
+    spawnTimer = 0;
+    gameRunning = true;
+    gameOver = false;
+    lastFrame = 0;
+
+    scoreDisplay.textContent = "0";
+    startGameButton.textContent = "RESTART GAME";
+}
+
+startGameButton.addEventListener("click", startGame);
+
+document.addEventListener("keydown", event => {
+    if (["ArrowLeft", "ArrowRight", " "].includes(event.key)) {
+        event.preventDefault();
+    }
+
+    keys[event.key] = true;
+
+    if (!gameRunning && (event.key === "Enter" || event.key === " ")) {
+        startGame();
+    }
+});
+
+document.addEventListener("keyup", event => {
+    keys[event.key] = false;
+});
+
+function bindGameButton(buttonId, direction) {
+    const button = document.getElementById(buttonId);
+
+    const press = event => {
+        event.preventDefault();
+        keys[direction] = true;
+    };
+
+    const release = event => {
+        event.preventDefault();
+        keys[direction] = false;
+    };
+
+    button.addEventListener("pointerdown", press);
+    button.addEventListener("pointerup", release);
+    button.addEventListener("pointerleave", release);
+    button.addEventListener("pointercancel", release);
+}
+
+bindGameButton("gameLeft", "ArrowLeft");
+bindGameButton("gameRight", "ArrowRight");
+
+function createObstacle() {
+    const size = 25 + Math.random() * 16;
+
+    obstacles.push({
+        x: Math.random() * (canvas.width - size),
+        y: -size,
+        width: size,
+        height: size,
+        speed: 2.5 + Math.random() * 2.5 + Math.min(score / 100, 3)
+    });
+}
+
+function collision(a, b) {
+    return (
+        a.x < b.x + b.width &&
+        a.x + a.width > b.x &&
+        a.y < b.y + b.height &&
+        a.y + a.height > b.y
+    );
+}
+
+function drawGrid() {
+    ctx.strokeStyle = "rgba(0,191,255,.08)";
+    ctx.lineWidth = 1;
+
+    for (let x = 0; x < canvas.width; x += 40) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, canvas.height);
+        ctx.stroke();
+    }
+
+    for (let y = 0; y < canvas.height; y += 40) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(canvas.width, y);
+        ctx.stroke();
+    }
+}
+
+function drawPlayer() {
+    ctx.save();
+
+    ctx.shadowBlur = 20;
+    ctx.shadowColor = "#00bfff";
+    ctx.fillStyle = "#55eaff";
+
+    ctx.fillRect(
+        player.x,
+        player.y,
+        player.width,
+        player.height
+    );
+
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = "#06101c";
+
+    ctx.fillRect(
+        player.x + 7,
+        player.y + 8,
+        player.width - 14,
+        8
+    );
+
+    ctx.restore();
+}
+
+function drawObstacles() {
+    obstacles.forEach(obstacle => {
+        ctx.save();
+        ctx.shadowBlur = 15;
+        ctx.shadowColor = "#006eff";
+        ctx.fillStyle = "#006eff";
+
+        ctx.fillRect(
+            obstacle.x,
+            obstacle.y,
+            obstacle.width,
+            obstacle.height
+        );
+
+        ctx.restore();
+    });
+}
+
+function endGame() {
+    gameRunning = false;
+    gameOver = true;
+
+    const finalScore = Math.floor(score);
+
+    if (finalScore > bestScore) {
+        bestScore = finalScore;
+        bestDisplay.textContent = bestScore;
+
+        try {
+            localStorage.setItem("horizonNeonRunBest", String(bestScore));
+        } catch (error) {
+            // The game still works if browser storage is unavailable.
+        }
+    }
+}
+
+function drawGameMessage(title, subtitle) {
+    ctx.fillStyle = "rgba(0,0,0,.76)";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    ctx.textAlign = "center";
+    ctx.shadowBlur = 20;
+    ctx.shadowColor = "#00bfff";
+    ctx.fillStyle = "#55eaff";
+    ctx.font = "bold 30px Orbitron, sans-serif";
+
+    ctx.fillText(title, canvas.width / 2, canvas.height / 2 - 10);
+
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "16px Rajdhani, sans-serif";
+
+    ctx.fillText(subtitle, canvas.width / 2, canvas.height / 2 + 28);
+}
+
+function updateGame(delta) {
+    if (!gameRunning) return;
+
+    const frameScale = Math.min(delta / 16.67, 2);
+
+    if (keys["ArrowLeft"] || keys["a"] || keys["A"]) {
+        player.x -= player.speed * frameScale;
+    }
+
+    if (keys["ArrowRight"] || keys["d"] || keys["D"]) {
+        player.x += player.speed * frameScale;
+    }
+
+    player.x = Math.max(
+        0,
+        Math.min(canvas.width - player.width, player.x)
+    );
+
+    spawnTimer += delta;
+
+    const spawnInterval = Math.max(280, 720 - score * 2);
+
+    if (spawnTimer >= spawnInterval) {
+        createObstacle();
+        spawnTimer = 0;
+    }
+
+    obstacles.forEach(obstacle => {
+        obstacle.y += obstacle.speed * frameScale;
+
+        if (collision(player, obstacle)) {
+            endGame();
+        }
+    });
+
+    obstacles = obstacles.filter(
+        obstacle => obstacle.y < canvas.height + obstacle.height
+    );
+
+    score += delta * 0.006;
+    scoreDisplay.textContent = Math.floor(score);
+}
+
+function drawGame() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    drawGrid();
+    drawPlayer();
+    drawObstacles();
+
+    if (!gameRunning && !gameOver) {
+        drawGameMessage("NEON RUN", "PRESS START TO BEGIN");
+    }
+
+    if (gameOver) {
+        drawGameMessage(
+            "SYSTEM OFFLINE",
+            "SCORE: " + Math.floor(score) + "  •  PRESS RESTART"
+        );
+    }
+}
+
+function gameLoop(timestamp) {
+    const delta = lastFrame ? timestamp - lastFrame : 16.67;
+    lastFrame = timestamp;
+
+    updateGame(delta);
+    drawGame();
+
+    requestAnimationFrame(gameLoop);
+}
+
+requestAnimationFrame(gameLoop);
+
+/* ================= SMOOTH NAVIGATION ================= */
+
+document.querySelectorAll('a[href^="#"]').forEach(link => {
+    link.addEventListener("click", event => {
+        const target = document.querySelector(link.getAttribute("href"));
+
+        if (target) {
+            event.preventDefault();
+            target.scrollIntoView({
+                behavior: "smooth",
+                block: "start"
+            });
+        }
+    });
+});
+</script>
+
+</body>
+</html>ss
